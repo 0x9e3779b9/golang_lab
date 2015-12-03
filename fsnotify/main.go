@@ -2,126 +2,73 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"os"
-
-	"github.com/howeyc/fsnotify"
 )
 
-func getFileSize(fn string) int {
-	fileInfo, err := os.Stat(fn)
+func main() {
+	w, err := NewLogWatcher("/tmp/fsnotify_test.log")
 	if err != nil {
-		log.Fatal(err)
-	}
-	return int(fileInfo.Size())
-}
-
-func readBytes(fname string, start, end int) []byte {
-	fh, _ := os.Open(fname)
-	defer fh.Close()
-
-	fh.Seek(int64(start), 0)
-	size := end - start + 1
-	buff := make([]byte, size)
-	fh.Read(buff)
-	return buff
-}
-
-func getBytesIndex(bts []byte, sep byte) int {
-	for index := range bts {
-		if sep == bts[index] {
-			return index
-		}
-	}
-	return -1
-}
-
-type LogWatcher struct {
-	watcher   *fsnotify.Watcher
-	msgChPool map[string]chan []byte
-}
-
-func NewLogWatcher() (w *LogWatcher, err error) {
-	wt, err := fsnotify.NewWatcher()
-	if err != nil {
+		fmt.Println(err)
 		return
 	}
-	w = &LogWatcher{
-		watcher:   wt,
-		msgChPool: make(map[string]chan []byte),
-	}
-	return
+	go w.Accept()
+	go w.Monitor()
+	<-w.eofCh
 }
 
-func (w *LogWatcher) AddPath(fn string) {
-	msgChPool[fn] = make(chan []byte, 1024)
-}
+// func test() {
+// 	watcher, err := fsnotify.NewWatcher()
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-func (w *LogWatcher) RemovePath(fn string) {
-	w.watcher.RemoveWatch(fn)
-}
+// 	fname := "/tmp/fsnotify_test.log"
+// 	done := make(chan bool)
+// 	msgCh := make(chan []byte, 1024)
 
-func (w *LogWatcher) Monitor() {
-}
+// 	go func() {
+// 		var lines []byte
+// 		for {
+// 			select {
+// 			case msg := <-msgCh:
+// 				lines = append(lines, msg...)
+// 				index := 0
+// 				for index > -1 {
+// 					index = getBytesIndex(lines, byte(10))
+// 					if index > -1 {
+// 						fmt.Println(string(lines[:index]))
+// 						lines = lines[index+1:]
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}()
 
-func (w *LogWatcher) Broadcast() {
+// 	go func() {
+// 		size := getFileSize(fname)
+// 		for {
+// 			select {
+// 			case ev := <-watcher.Event:
+// 				if ev.IsModify() {
+// 					sizeN := getFileSize(fname)
+// 					if sizeN > size {
+// 						msgCh <- readBytes(fname, size, sizeN-1)
+// 					}
+// 					size = sizeN
+// 				}
+// 			case err := <-watcher.Error:
+// 				log.Println("error:", err)
+// 			}
+// 		}
+// 	}()
 
-}
+// 	err = watcher.Watch(fname)
+// 	if err != nil {
+// 		log.Fatal(err)
+// 	}
 
-func main() {
-	watcher, err := fsnotify.NewWatcher()
-	if err != nil {
-		log.Fatal(err)
-	}
+// 	// Hang so program doesn't exit
+// 	<-done
 
-	fname := "/tmp/fsnotify_test.log"
-	done := make(chan bool)
-	msgCh := make(chan []byte, 1024)
-
-	go func() {
-		var lines []byte
-		for {
-			select {
-			case msg := <-msgCh:
-				lines = append(lines, msg...)
-				index := 0
-				for index > -1 {
-					index = getBytesIndex(lines, byte(10))
-					if index > -1 {
-						fmt.Println(string(lines[:index]))
-						lines = lines[index+1:]
-					}
-				}
-			}
-		}
-	}()
-
-	go func() {
-		size := getFileSize(fname)
-		for {
-			select {
-			case ev := <-watcher.Event:
-				if ev.IsModify() {
-					sizeN := getFileSize(fname)
-					if sizeN > size {
-						msgCh <- readBytes(fname, size, sizeN-1)
-					}
-					size = sizeN
-				}
-			case err := <-watcher.Error:
-				log.Println("error:", err)
-			}
-		}
-	}()
-
-	err = watcher.Watch(fname)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Hang so program doesn't exit
-	<-done
-
-	/* ... do stuff ... */
-	watcher.Close()
-}
+// 	/* ... do stuff ... */
+// 	watcher.Close()
+// }
