@@ -29,6 +29,7 @@ func (a *A) Run() {
 	var num int
 	a.wg.Add(1)
 	defer a.wg.Done()
+LOOP:
 	for {
 		select {
 		case <-a.pauseCh:
@@ -39,7 +40,7 @@ func (a *A) Run() {
 			atomic.StoreInt32(&tag, 0)
 		case <-a.stopCh:
 			println("stop")
-			break
+			break LOOP
 		default:
 			if atomic.LoadInt32(&tag) == 0 {
 				println("default")
@@ -48,7 +49,7 @@ func (a *A) Run() {
 				print("finished")
 				println(num)
 				if num >= a.cnt {
-					break
+					break LOOP
 				}
 			} else {
 				time.Sleep(time.Second * 1)

@@ -35,3 +35,19 @@ type CaseOption struct {
 	Param    map[string]string `json:"param"`
 	ConfPath string            `json:"conf_path"`
 }
+
+func NewRecord(tc *TaskCase) *Record {
+	return &Record{
+		TaskCaseID: tc.ID,
+		CaseOpt:    tc.Opt,
+		StartTime:  "now",
+		EndTime:    "tom",
+	}
+}
+
+func (r *Record) Result(byt []byte) {
+}
+
+func InsertRecord(r *Record) {
+
+}

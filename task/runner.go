@@ -108,6 +108,17 @@ type TaskManager struct {
 
 var defaultTaskMgr *TaskManager
 
+func Init() {
+	defaultTaskMgr = &TaskManager{
+		pool:       make(map[int64]*TaskUnit),
+		inCh:       make(chan *models.Task, 24),
+		stop:       make(chan struct{}),
+		pauseCh:    make(chan int64, 24),
+		continueCh: make(chan int64, 24),
+		stopCh:     make(chan int64, 24),
+	}
+}
+
 func AcceptTask(t *models.Task) (err error) {
 	if _, ok := defaultTaskMgr.pool[t.ID]; ok {
 		err = errors.New("Existed!")
@@ -160,7 +171,7 @@ func ProceedTask(id int64) (err error) {
 
 func (m *TaskManager) ReadLoop() {
 	var (
-		t  *models.Tasl
+		t  *models.Task
 		id int64
 	)
 
