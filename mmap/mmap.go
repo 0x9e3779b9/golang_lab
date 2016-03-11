@@ -140,7 +140,7 @@ func main() {
 	fmt.Println(time.Now().Unix())
 
 	for i := 23; i < 40; i++ {
-		fn := fmt.Sprintf("/home/yangdongchen/thisisoverwritten-2015-08-25_000%d", i)
+		fn := fmt.Sprintf("/2015-08-25_000%d", i)
 		//fn := "/tmp/200.lst"
 		SnowFoxRead(fn)
 	}

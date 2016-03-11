@@ -1,5 +1,4 @@
 /*********************************************
-*  Author:  Dongchen Yang
 *  Last modified: 2015-12-07 20:40
 *  Filename: main.go
 *  Description:
