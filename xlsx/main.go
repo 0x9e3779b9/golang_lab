@@ -1,32 +1,52 @@
 package main
 
 import (
+	"encoding/base64"
 	"fmt"
+	"io/ioutil"
+
 	"github.com/tealeg/xlsx"
+)
+
+var (
+	green = &xlsx.Style{Fill: *xlsx.NewFill("solid", "0000FF00", "00FF0000"), ApplyFill: true}
+	red   = &xlsx.Style{Fill: *xlsx.NewFill("solid", "00FF0000", "FF000000"), ApplyFill: true}
 )
 
 func Test() {
 	xlFile := xlsx.NewFile()
-	sh := xlFile.AddSheet("test")
+	sh := xlFile.AddSheet("result")
+	sh.SetColWidth(1, 2, 50)
+	sh.MaxCol = 2
 	header := sh.AddRow()
+	rCell := &xlsx.Cell{Value: "结果"}
+	rCell.SetStyle(red)
 	header.Cells = []*xlsx.Cell{
-		&xlsx.Cell{Value: "Name"},
-		&xlsx.Cell{Value: "ID"},
-		&xlsx.Cell{Value: "Cost"},
-		&xlsx.Cell{Value: "Result"},
+		&xlsx.Cell{Value: "编号"},
+		rCell,
 	}
 	for i := 0; i < 10; i++ {
 		row := sh.AddRow()
+		rs := &xlsx.Cell{Value: "这是一个悲伤的故事，一旦这样就那样。。。。。。\n好的没问题！"}
+		rs.SetStyle(green)
 		row.Cells = []*xlsx.Cell{
-			&xlsx.Cell{Value: "Mike"},
-			&xlsx.Cell{Value: fmt.Sprintf("%d", i+1)},
-			&xlsx.Cell{Value: fmt.Sprintf("%d", i+20)},
-			&xlsx.Cell{Value: "pass"},
+			&xlsx.Cell{Value: "aaaaaa"},
+			rs,
 		}
 	}
-	xlFile.Save("/Users/dongchen/dumps/demo.xlsx")
+	xlFile.Save("aaa.xlsx")
+}
+
+func readFileToBytes() {
+	b, err := ioutil.ReadFile("~/dumps/demo.xlsx")
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	fmt.Println(base64.StdEncoding.EncodeToString(b))
 }
 
 func main() {
 	Test()
+	//readFileToBytes()
 }
